@@ -1,0 +1,70 @@
+version: '3'
+services:
+  spark-master:
+    build: .
+    image: teko_spark_env:latest
+    environment:
+      JAVA_HOME: "/usr/lib/jvm/java-1.8-openjdk/"
+      HADOOP_HOME: "/hadoop"
+      # HIVE_HOME: "/hive"
+      SPARK_DIST_CLASSPATH: "/hadoop/etc/hadoop:/hadoop/share/hadoop/common/lib/*:/hadoop/share/hadoop/common/*:/hadoop/share/hadoop/hdfs:/hadoop/share/hadoop/hdfs/lib/*:/hadoop/share/hadoop/hdfs/*:/hadoop/share/hadoop/yarn/lib/*:/hadoop/share/hadoop/yarn/*:/hadoop/share/hadoop/mapreduce/lib/*:/hadoop/share/hadoop/mapreduce/*:/contrib/capacity-scheduler/*.jar"
+    volumes:
+        - ./hadoop-3.2.1:/hadoop
+        - ./spark-2.4.4-bin-without-hadoop:/spark
+        - ./logs/master:/spark/logs/
+    command: /spark/sbin/start-master.sh
+    ports:
+      - "18080:8080"
+      - "7077:7077"
+
+  spark-worker-1:
+    build: .
+    image: teko_spark_env:latest
+    environment:
+      JAVA_HOME: "/usr/lib/jvm/java-1.8-openjdk/"
+      SPARK_DIST_CLASSPATH: "/hadoop/etc/hadoop:/hadoop/share/hadoop/common/lib/*:/hadoop/share/hadoop/common/*:/hadoop/share/hadoop/hdfs:/hadoop/share/hadoop/hdfs/lib/*:/hadoop/share/hadoop/hdfs/*:/hadoop/share/hadoop/yarn/lib/*:/hadoop/share/hadoop/yarn/*:/hadoop/share/hadoop/mapreduce/lib/*:/hadoop/share/hadoop/mapreduce/*:/contrib/capacity-scheduler/*.jar"
+    volumes:
+        - ./hadoop-3.2.1:/hadoop
+        - ./spark-2.4.4-bin-without-hadoop:/spark
+        - ./logs/worker1:/spark/logs/
+    depends_on:
+      - spark-master
+    ports:
+      - "18081:8081"
+    command: /spark/sbin/start-slave.sh "spark://spark-master:7077"
+
+  vault:
+    image: vault:1.4.2
+    command: vault server -config=/opt/vault/config.hcl
+    cap_add:
+      - IPC_LOCK
+    ports:
+        - "8200:8200"
+        - "8201:8201"
+
+    volumes:
+        - ./conf/vault:/opt/vault
+        - ./data/vault:/opt/vault/data
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "23306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: '123456'
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+
+  storage:
+    image: minio/minio:edge
+    ports:
+      - "9900:9000"
+    command: server /data
+    # environment:
+    #   - MINIO_ACCESS_KEY=minio
+    #   - MINIO_SECRET_KEY=minio123
+    #   - MINIO_ACCESS_KEY_OLD=minioadmin
+    #   - MINIO_SECRET_KEY_OLD=minioadmin
+    volumes:
+      - ./data/minio:/data
