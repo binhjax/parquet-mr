@@ -6,6 +6,7 @@ services:
     environment:
       JAVA_HOME: "/usr/lib/jvm/java-1.8-openjdk/"
       HADOOP_HOME: "/hadoop"
+      SPARK_NO_DAEMONIZE: "true"
       # HIVE_HOME: "/hive"
       SPARK_DIST_CLASSPATH: "/hadoop/etc/hadoop:/hadoop/share/hadoop/common/lib/*:/hadoop/share/hadoop/common/*:/hadoop/share/hadoop/hdfs:/hadoop/share/hadoop/hdfs/lib/*:/hadoop/share/hadoop/hdfs/*:/hadoop/share/hadoop/yarn/lib/*:/hadoop/share/hadoop/yarn/*:/hadoop/share/hadoop/mapreduce/lib/*:/hadoop/share/hadoop/mapreduce/*:/contrib/capacity-scheduler/*.jar"
     volumes:
@@ -21,12 +22,13 @@ services:
     build: .
     image: teko_spark_env:latest
     environment:
+      SPARK_NO_DAEMONIZE: "true"
       JAVA_HOME: "/usr/lib/jvm/java-1.8-openjdk/"
       SPARK_DIST_CLASSPATH: "/hadoop/etc/hadoop:/hadoop/share/hadoop/common/lib/*:/hadoop/share/hadoop/common/*:/hadoop/share/hadoop/hdfs:/hadoop/share/hadoop/hdfs/lib/*:/hadoop/share/hadoop/hdfs/*:/hadoop/share/hadoop/yarn/lib/*:/hadoop/share/hadoop/yarn/*:/hadoop/share/hadoop/mapreduce/lib/*:/hadoop/share/hadoop/mapreduce/*:/contrib/capacity-scheduler/*.jar"
     volumes:
         - ./hadoop-3.2.1:/hadoop
         - ./spark-2.4.4-bin-without-hadoop:/spark
-        - ./logs/worker1:/spark/logs/
+        - ./logs/worker1:/spark/logs
     depends_on:
       - spark-master
     ports:
