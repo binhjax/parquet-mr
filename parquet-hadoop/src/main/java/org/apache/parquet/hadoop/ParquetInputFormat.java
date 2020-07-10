@@ -259,6 +259,7 @@ public class ParquetInputFormat<T> extends FileInputFormat<Void, T> {
   public RecordReader<Void, T> createRecordReader(
       InputSplit inputSplit,
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+        System.out.println("ParquetInputFormat.createRecordReader: start");
     Configuration conf = ContextUtil.getConfiguration(taskAttemptContext);
     ReadSupport<T> readSupport = getReadSupport(conf);
     return new ParquetRecordReader<T>(readSupport, getFilter(conf));
@@ -342,6 +343,8 @@ public class ParquetInputFormat<T> extends FileInputFormat<Void, T> {
    */
   @Deprecated
   public List<ParquetInputSplit> getSplits(Configuration configuration, List<Footer> footers) throws IOException {
+    System.out.println("ParquetInputFormat.getSplits: start");
+
     boolean strictTypeChecking = configuration.getBoolean(STRICT_TYPE_CHECKING, true);
     final long maxSplitSize = configuration.getLong("mapred.max.split.size", Long.MAX_VALUE);
     final long minSplitSize = Math.max(getFormatMinSplitSize(), configuration.getLong("mapred.min.split.size", 0L));
@@ -402,6 +405,8 @@ public class ParquetInputFormat<T> extends FileInputFormat<Void, T> {
    * @throws IOException if there is an error while reading
    */
   public List<Footer> getFooters(JobContext jobContext) throws IOException {
+    System.out.println("ParquetInputFormat.getFooters: start");
+
     List<FileStatus> statuses = listStatus(jobContext);
     if (statuses.isEmpty()) {
       return Collections.emptyList();
@@ -465,6 +470,7 @@ public class ParquetInputFormat<T> extends FileInputFormat<Void, T> {
   }
 
   public List<Footer> getFooters(Configuration configuration, List<FileStatus> statuses) throws IOException {
+    System.out.println("ParquetInputFormat.getFooters: start 2");
     return getFooters(configuration, (Collection<FileStatus>)statuses);
   }
 
@@ -477,6 +483,8 @@ public class ParquetInputFormat<T> extends FileInputFormat<Void, T> {
    */
   public List<Footer> getFooters(Configuration configuration, Collection<FileStatus> statuses) throws IOException {
     LOG.debug("reading {} files", statuses.size());
+    System.out.println("ParquetInputFormat.getFooters: start 3");
+
     boolean taskSideMetaData = isTaskSideMetaData(configuration);
     return ParquetFileReader.readAllFootersInParallelUsingSummaryFiles(configuration, statuses, taskSideMetaData);
   }
@@ -487,6 +495,8 @@ public class ParquetInputFormat<T> extends FileInputFormat<Void, T> {
    * @throws IOException if there is an error while reading
    */
   public GlobalMetaData getGlobalMetaData(JobContext jobContext) throws IOException {
+    System.out.println("ParquetInputFormat.getGlobalMetaData: start ");
+
     return ParquetFileWriter.getGlobalMetaData(getFooters(jobContext));
   }
 
@@ -754,6 +764,8 @@ class ClientSideMetadataSplitStrategy {
           FileStatus fileStatus,
           String requestedSchema,
           Map<String, String> readSupportMetadata, long minSplitSize, long maxSplitSize) throws IOException {
+
+    System.out.println("ParquetInputFormat.generateSplits: start ");
 
     List<SplitInfo> splitRowGroups =
         generateSplitInfo(rowGroupBlocks, hdfsBlocksArray, minSplitSize, maxSplitSize);

@@ -100,6 +100,7 @@ public class HadoopReadOptions extends ParquetReadOptions {
 
     @Override
     public ParquetReadOptions build() {
+      System.out.println("ParquetReadOptions.Builder.build: start");
       if (null == fileDecryptionProperties) {
         // if not set, check if Hadoop conf defines decryption factory and properties
         fileDecryptionProperties = createDecryptionProperties(filePath, conf);
@@ -112,6 +113,8 @@ public class HadoopReadOptions extends ParquetReadOptions {
   }
 
   private static FileDecryptionProperties createDecryptionProperties(Path file, Configuration hadoopConfig) {
+    System.out.println("ParquetReadOptions.createDecryptionProperties: start");
+
     DecryptionPropertiesFactory cryptoFactory = DecryptionPropertiesFactory.loadFactory(hadoopConfig);
     if (null == cryptoFactory) {
       return null;

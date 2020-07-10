@@ -10,19 +10,19 @@ import org.slf4j.LoggerFactory;
 /**
  * DecryptionPropertiesFactory interface enables transparent activation of Parquet decryption.
  *
- * Its customized implementations produce decryption properties for each Parquet file, using the input information
- * available in Parquet file readers: file path and Hadoop configuration properties that can pass custom parameters
- * required by a crypto factory. A factory implementation can use or ignore any of these inputs.
+ * <p>Its customized implementations produce decryption properties for each Parquet file, using the
+ * input information available in Parquet file readers: file path and Hadoop configuration
+ * properties that can pass custom parameters required by a crypto factory. A factory implementation
+ * can use or ignore any of these inputs.
  *
- * The example usage could be as below.
- *   1. Write a class to implement DecryptionPropertiesFactory.
- *   2. Set configuration of "parquet.crypto.factory.class" with the fully qualified name of this class.
- *      For example, we can set the configuration in SparkSession as below.
- *         SparkSession spark = SparkSession
- *                     .config("parquet.crypto.factory.class",
- *                     "xxx.xxx.DecryptionPropertiesClassLoaderImpl")
+ * <p>The example usage could be as below. 1. Write a class to implement
+ * DecryptionPropertiesFactory. 2. Set configuration of "parquet.crypto.factory.class" with the
+ * fully qualified name of this class. For example, we can set the configuration in SparkSession as
+ * below. SparkSession spark = SparkSession .config("parquet.crypto.factory.class",
+ * "xxx.xxx.DecryptionPropertiesClassLoaderImpl")
  *
- * The implementation of this interface will be instantiated by {@link #loadFactory(Configuration)}.
+ * <p>The implementation of this interface will be instantiated by {@link
+ * #loadFactory(Configuration)}.
  */
 public interface DecryptionPropertiesFactory {
 
@@ -30,17 +30,20 @@ public interface DecryptionPropertiesFactory {
   String CRYPTO_FACTORY_CLASS_PROPERTY_NAME = "parquet.crypto.factory.class";
 
   /**
-   * Load DecryptionPropertiesFactory class specified by CRYPTO_FACTORY_CLASS_PROPERTY_NAME as the path in the configuration
+   * Load DecryptionPropertiesFactory class specified by CRYPTO_FACTORY_CLASS_PROPERTY_NAME as the
+   * path in the configuration
    *
    * @param conf Configuration where user specifies the class path
-   * @return object with class DecryptionPropertiesFactory if user specified the class path and invoking of
-   * the class succeeds. Null if user doesn't specify the class path (no decryption factory then - not required for plaintext files.
-   * Or for plaintext columns in encrypted files with plaintext footer).
+   * @return object with class DecryptionPropertiesFactory if user specified the class path and
+   *     invoking of the class succeeds. Null if user doesn't specify the class path (no decryption
+   *     factory then - not required for plaintext files. Or for plaintext columns in encrypted
+   *     files with plaintext footer).
    * @throws BadConfigurationException if the instantiation of the configured class fails
    */
   static DecryptionPropertiesFactory loadFactory(Configuration conf) {
-    final Class<?> decryptionPropertiesFactoryClass = ConfigurationUtil.getClassFromConfig(conf,
-      CRYPTO_FACTORY_CLASS_PROPERTY_NAME, DecryptionPropertiesFactory.class);
+    final Class<?> decryptionPropertiesFactoryClass =
+        ConfigurationUtil.getClassFromConfig(
+            conf, CRYPTO_FACTORY_CLASS_PROPERTY_NAME, DecryptionPropertiesFactory.class);
 
     if (null == decryptionPropertiesFactoryClass) {
       LOG.debug("DecryptionPropertiesFactory is not configured - name not found in hadoop config");
@@ -50,21 +53,25 @@ public interface DecryptionPropertiesFactory {
     try {
       return (DecryptionPropertiesFactory) decryptionPropertiesFactoryClass.newInstance();
     } catch (InstantiationException | IllegalAccessException e) {
-      throw new BadConfigurationException("could not instantiate decryptionPropertiesFactoryClass class: "
-        + decryptionPropertiesFactoryClass, e);
+      throw new BadConfigurationException(
+          "could not instantiate decryptionPropertiesFactoryClass class: "
+              + decryptionPropertiesFactoryClass,
+          e);
     }
   }
 
   /**
-   * Get FileDecryptionProperties object which is created by the implementation of this interface. Please see
-   * the unit test SampleDecryptionPropertiesFactory for example
+   * Get FileDecryptionProperties object which is created by the implementation of this interface.
+   * Please see the unit test SampleDecryptionPropertiesFactory for example
    *
    * @param hadoopConfig Configuration that is used to pass the needed information, e.g. KMS uri
-   * @param filePath File path of the parquet file
-   *                 Can be used for AAD prefix verification, part of key metadata etc
-   * @return object with class of FileDecryptionProperties. Null return value means no decryption properties
-   * are available for the file (not required for plaintext files. Or for plaintext columns in encrypted files with plaintext footer).
+   * @param filePath File path of the parquet file Can be used for AAD prefix verification, part of
+   *     key metadata etc
+   * @return object with class of FileDecryptionProperties. Null return value means no decryption
+   *     properties are available for the file (not required for plaintext files. Or for plaintext
+   *     columns in encrypted files with plaintext footer).
    * @throws ParquetCryptoRuntimeException if there is an exception while creating the object
    */
-  FileDecryptionProperties getFileDecryptionProperties(Configuration hadoopConfig, Path filePath) throws ParquetCryptoRuntimeException;
+  FileDecryptionProperties getFileDecryptionProperties(Configuration hadoopConfig, Path filePath)
+      throws ParquetCryptoRuntimeException;
 }

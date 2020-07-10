@@ -30,6 +30,7 @@ import org.apache.parquet.hadoop.util.ConfigurationUtil;
 import org.apache.parquet.hadoop.util.HadoopOutputFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Map;
 
 /**
  * OutputFormat to write to a Parquet file
@@ -168,6 +169,7 @@ public class ParquetOutputFormat<T> extends FileOutputFormat<Void, T> {
   }
 
   public static Class<?> getWriteSupportClass(Configuration configuration) {
+    System.out.println("ParquetOutputFormat.getWriteSupportClass: start");
     final String className = configuration.get(WRITE_SUPPORT_CLASS);
     if (className == null) {
       return null;
@@ -419,6 +421,7 @@ public class ParquetOutputFormat<T> extends FileOutputFormat<Void, T> {
 
   public RecordWriter<Void, T> getRecordWriter(Configuration conf, Path file, CompressionCodecName codec, Mode mode)
         throws IOException, InterruptedException {
+    System.out.println("ParquetOutputFormat.getRecordWriter: start. ");
     final WriteSupport<T> writeSupport = getWriteSupport(conf);
 
     ParquetProperties.Builder propsBuilder = ParquetProperties.builder()
@@ -435,6 +438,7 @@ public class ParquetOutputFormat<T> extends FileOutputFormat<Void, T> {
         .withBloomFilterEnabled(getBloomFilterEnabled(conf))
         .withPageRowCountLimit(getPageRowCountLimit(conf))
         .withPageWriteChecksumEnabled(getPageWriteChecksumEnabled(conf));
+
     new ColumnConfigParser()
         .withColumnConfig(ENABLE_DICTIONARY, key -> conf.getBoolean(key, false), propsBuilder::withDictionaryEncoding)
         .withColumnConfig(BLOOM_FILTER_ENABLED, key -> conf.getBoolean(key, false),
@@ -457,8 +461,11 @@ public class ParquetOutputFormat<T> extends FileOutputFormat<Void, T> {
 
     WriteContext fileWriteContext = writeSupport.init(conf);
 
+    System.out.println("ParquetOutputFormat.getRecordWriter: call createEncryptionProperties ");
     FileEncryptionProperties encryptionProperties = createEncryptionProperties(conf, file, fileWriteContext);
 
+
+    System.out.println("ParquetOutputFormat.getRecordWriter: create new ParquetFileWriter ");
     ParquetFileWriter w = new ParquetFileWriter(HadoopOutputFile.fromPath(file, conf),
         fileWriteContext.getSchema(), mode, blockSize, maxPaddingSize, props.getColumnIndexTruncateLength(),
         props.getStatisticsTruncateLength(), props.getPageWriteChecksumEnabled(), encryptionProperties);
@@ -477,7 +484,7 @@ public class ParquetOutputFormat<T> extends FileOutputFormat<Void, T> {
       LOG.warn("The configuration " + MEMORY_POOL_RATIO + " has been set. It should not " +
           "be reset by the new value: " + maxLoad);
     }
-
+    System.out.println("ParquetOutputFormat.getRecordWriter: return new ParquetRecordWriter ");
     return new ParquetRecordWriter<T>(
         w,
         writeSupport,

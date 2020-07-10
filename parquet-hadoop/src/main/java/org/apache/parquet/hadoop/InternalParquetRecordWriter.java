@@ -71,6 +71,7 @@ class InternalParquetRecordWriter<T> {
       BytesCompressor compressor,
       boolean validating,
       ParquetProperties props) {
+    System.out.println("InternalParquetRecordWriter.contruct: start ");
     this.parquetFileWriter = parquetFileWriter;
     this.writeSupport = Objects.requireNonNull(writeSupport, "writeSupport cannot be null");
     this.schema = schema;
@@ -87,17 +88,19 @@ class InternalParquetRecordWriter<T> {
   }
 
   public ParquetMetadata getFooter() {
+    System.out.println("InternalParquetRecordWriter.getFooter: start ");
     return parquetFileWriter.getFooter();
   }
 
   private void initStore() {
+    System.out.println("InternalParquetRecordWriter.initStore: start ");
     ColumnChunkPageWriteStore columnChunkPageWriteStore = new ColumnChunkPageWriteStore(compressor,
         schema, props.getAllocator(), props.getColumnIndexTruncateLength(), props.getPageWriteChecksumEnabled(),
         fileEncryptor, rowGroupOrdinal);
-    pageStore = columnChunkPageWriteStore;
+    pageStore = columnChunkPageWriteStore;  //Create pageStore 
     bloomFilterWriteStore = columnChunkPageWriteStore;
 
-    columnStore = props.newColumnWriteStore(schema, pageStore, bloomFilterWriteStore);
+    columnStore = props.newColumnWriteStore(schema, pageStore, bloomFilterWriteStore);  //Create columnStore
     MessageColumnIO columnIO = new ColumnIOFactory(validating).getColumnIO(schema);
     this.recordConsumer = columnIO.getRecordWriter(columnStore);
     writeSupport.prepareForWrite(recordConsumer);
@@ -113,12 +116,15 @@ class InternalParquetRecordWriter<T> {
         finalMetadata.put(ParquetWriter.OBJECT_MODEL_NAME_PROP, modelName);
       }
       finalMetadata.putAll(finalWriteContext.getExtraMetaData());
+      System.out.println("InternalParquetRecordWriter.close(): save finalMetadata");
+      System.out.println(finalMetadata);
       parquetFileWriter.end(finalMetadata);
       closed = true;
     }
   }
 
   public void write(T value) throws IOException, InterruptedException {
+    System.out.println("InternalParquetRecordWriter.write: call writeSupport.write ");
     writeSupport.write(value);
     ++ recordCount;
     checkBlockSizeReached();
@@ -162,6 +168,7 @@ class InternalParquetRecordWriter<T> {
     }
 
     if (recordCount > 0) {
+      System.out.println("InternalParquetRecordWriter.flushRowGroupToStore: start write block ");
       rowGroupOrdinal++;
       parquetFileWriter.startBlock(recordCount);
       columnStore.flush();

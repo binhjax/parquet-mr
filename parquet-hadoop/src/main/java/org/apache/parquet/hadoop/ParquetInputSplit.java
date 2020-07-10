@@ -71,6 +71,7 @@ public class ParquetInputSplit extends FileSplit implements Writable {
       Map<String, String> extraMetadata,
       Map<String, String> readSupportMetadata) {
     this(path, start, end(blocks, requestedSchema), length, hosts, offsets(blocks));
+    System.out.println("ParquetInputSplit.construct: start ");
   }
 
   private static long end(List<BlockMetaData> blocks, String requestedSchema) {
@@ -147,6 +148,8 @@ public class ParquetInputSplit extends FileSplit implements Writable {
     super(file, start, length, hosts);
     this.end = end;
     this.rowGroupOffsets = rowGroupOffsets;
+    System.out.println("ParquetInputSplit.construct: start 2");
+
   }
 
   /**

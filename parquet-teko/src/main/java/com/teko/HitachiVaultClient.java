@@ -16,16 +16,45 @@ import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.Base64;
+import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.Metadata;
 
 public class HitachiVaultClient {
 
   public static void main(String args[]) {
-    Random random = ThreadLocalRandom.current();
-    byte[] randomBytes = new byte[16];
-    random.nextBytes(randomBytes);
-    String encoded = Base64.getUrlEncoder().encodeToString(randomBytes);
+      System.out.println("Test");
+      // String  path = "s3a://encrypted/sale_record10/part-00000-0261370f-dbe1-4ac0-bff1-4c0b78d68bfb-c000.snappy.parquet";
+      // String  lpath = path.substring(0, path.lastIndexOf('/'));
+      // String arrPath = lpath.replace("s3a:/", "kv/parquet");
+      // System.out.println(arrPath);
 
-     System.out.println("Key length: " + encoded.length());
+      String data = "{\"type\":\"struct\",\"fields\":[{\"name\":\"int_column\",\"type\":\"long\",\"nullable\":true,\"metadata\":{\"keyPath\":\"kv/path/encrypted/path\",\"keyId\":\"int_column\"}},{\"name\":\"square_int_column\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}}]}";
+
+      StructType dataType = (StructType) StructType.fromJson(data);
+      StructField[] fields = dataType.fields();
+      for(int i=0; i < fields.length; i++){
+        StructField field = fields[i];
+        Metadata meta = field.metadata();
+        String keyPath = "";
+        if (meta.contains("keyPath")) {
+          keyPath = meta.getString("keyPath");
+        }
+        String keyId = "";
+        if (meta.contains("keyId")) {
+          keyId = meta.getString("keyId");
+        }
+        System.out.println(keyPath);
+        System.out.println(keyId);
+      }
+      // System.out.print(dataType.json());
+
+    // Random random = ThreadLocalRandom.current();
+    // byte[] randomBytes = new byte[16];
+    // random.nextBytes(randomBytes);
+    // String encoded = Base64.getUrlEncoder().encodeToString(randomBytes);
+    //
+    //  System.out.println("Key length: " + encoded.length());
 
      // String vault_url = "http://127.0.0.1:8200";
      // String access_token = "s.o9Mx60qKPTYIK5hsxKh6XRcZ";

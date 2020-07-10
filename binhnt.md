@@ -68,7 +68,7 @@ sc._jsc.hadoopConfiguration().set("fs.s3a.access.key","minioadmin")
 sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key","minioadmin")
 sc._jsc.hadoopConfiguration().set("fs.s3a.path.style.access","True")
 
-
+sc._jvm.com.teko.parquet.TekoVaultFactory.InitializeKeys(sc._jsc.hadoopConfiguration())
 
 no_encryptedParquetPath = "s3a://encrypted/no_encrypted"
 squaresDF.write.parquet(no_encryptedParquetPath)
@@ -81,6 +81,11 @@ sc._jsc.hadoopConfiguration().set("encryption.user.password", "123456" )
 sc._jsc.hadoopConfiguration().set("encryption.secrets.path", "kv/parquet/encrypted/test_encrypted" )
 sc._jsc.hadoopConfiguration().set("encryption.columns", "square_int_column" )
 
+sc._jvm.com.teko.parquet.TekoVaultFactory.InitializeKeys(sc._jsc.hadoopConfiguration())
+
+#java_import(sparkContext._jvm, "com.teko.parquet.TekoVaultFactory")
+#TekoVaultFactory  = spark.sparkContext._jvm.TekoVaultFactory()
+#TekoVaultFactory.createColumnKeys(sc._jsc.hadoopConfiguration())
 
 encryptedParquetPath = "s3a://encrypted/test_encrypted"
 squaresDF.write.parquet(encryptedParquetPath)
@@ -128,3 +133,7 @@ parquetFile.show()
 
       mvn  -Drat.skip=true -Dmaven.test.skip=true -Djapicmp.skip=true  install
       mvn exec:java
+
+
+
+      -Dmaven.test.skip=true -Dlicense.skip=true  -Drat.skip=true  package

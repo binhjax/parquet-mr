@@ -22,9 +22,9 @@ package org.apache.parquet.crypto;
 public interface AADPrefixVerifier {
 
   /**
-   * Verifies identity (AAD Prefix) of individual file, or of file collection in a data set.
-   * Must be thread-safe.
-   * 
+   * Verifies identity (AAD Prefix) of individual file, or of file collection in a data set. Must be
+   * thread-safe.
+   *
    * @param aadPrefix AAD Prefix
    * @throws ParquetCryptoRuntimeException Throw exception if AAD prefix is wrong.
    */

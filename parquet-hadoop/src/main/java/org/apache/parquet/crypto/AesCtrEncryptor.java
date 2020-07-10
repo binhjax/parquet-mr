@@ -19,15 +19,13 @@
 
 package org.apache.parquet.crypto;
 
+import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
-
 import org.apache.parquet.bytes.BytesUtils;
 import org.apache.parquet.format.BlockCipher;
 
-import java.security.GeneralSecurityException;
-
-public class AesCtrEncryptor extends AesCipher implements BlockCipher.Encryptor{
+public class AesCtrEncryptor extends AesCipher implements BlockCipher.Encryptor {
 
   private final byte[] ctrIV;
 
@@ -55,14 +53,14 @@ public class AesCtrEncryptor extends AesCipher implements BlockCipher.Encryptor{
     return encrypt(writeLength, plainText, localNonce, AAD);
   }
 
-  public byte[] encrypt(boolean writeLength, byte[] plainText, byte[] nonce, byte[] AAD) { 
+  public byte[] encrypt(boolean writeLength, byte[] plainText, byte[] nonce, byte[] AAD) {
 
     if (nonce.length != NONCE_LENGTH) {
       throw new ParquetCryptoRuntimeException("Wrong nonce length " + nonce.length);
     }
     int plainTextLength = plainText.length;
     int cipherTextLength = NONCE_LENGTH + plainTextLength;
-    int lengthBufferLength = writeLength? SIZE_LENGTH : 0;
+    int lengthBufferLength = writeLength ? SIZE_LENGTH : 0;
     byte[] cipherText = new byte[lengthBufferLength + cipherTextLength];
     int inputLength = plainTextLength;
     int inputOffset = 0;
@@ -81,13 +79,14 @@ public class AesCtrEncryptor extends AesCipher implements BlockCipher.Encryptor{
       }
 
       cipher.doFinal(plainText, inputOffset, inputLength, cipherText, outputOffset);
-    }  catch (GeneralSecurityException e) {
+    } catch (GeneralSecurityException e) {
       throw new ParquetCryptoRuntimeException("Failed to encrypt", e);
     }
 
     // Add ciphertext length
     if (writeLength) {
-      System.arraycopy(BytesUtils.intToBytes(cipherTextLength), 0, cipherText, 0, lengthBufferLength);
+      System.arraycopy(
+          BytesUtils.intToBytes(cipherTextLength), 0, cipherText, 0, lengthBufferLength);
     }
     // Add the nonce
     System.arraycopy(nonce, 0, cipherText, lengthBufferLength, NONCE_LENGTH);
@@ -95,4 +94,3 @@ public class AesCtrEncryptor extends AesCipher implements BlockCipher.Encryptor{
     return cipherText;
   }
 }
-

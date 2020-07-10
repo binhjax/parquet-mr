@@ -227,6 +227,7 @@ public class ParquetFileWriter {
                            Path file, Mode mode) throws IOException {
     this(HadoopOutputFile.fromPath(file, configuration),
         schema, mode, DEFAULT_BLOCK_SIZE, MAX_PADDING_SIZE_DEFAULT);
+
   }
 
   /**
@@ -291,9 +292,13 @@ public class ParquetFileWriter {
                            int statisticsTruncateLength, boolean pageWriteChecksumEnabled,
                            FileEncryptionProperties encryptionProperties)
     throws IOException {
+
+    System.out.println("ParquetFileWriter.construct: start 1");
     TypeUtil.checkValidWriteSchema(schema);
 
     this.schema = schema;
+
+    // System.out.println(schema);
 
     long blockSize = rowGroupSize;
     if (file.supportsBlockSize()) {
@@ -348,6 +353,8 @@ public class ParquetFileWriter {
   ParquetFileWriter(Configuration configuration, MessageType schema,
                     Path file, long rowAndBlockSize, int maxPaddingSize)
       throws IOException {
+    System.out.println("ParquetFileWriter.construct: start 2. ");
+
     FileSystem fs = file.getFileSystem(configuration);
     this.schema = schema;
     this.alignment = PaddingAlignment.get(
@@ -369,6 +376,7 @@ public class ParquetFileWriter {
    * @throws IOException if there is an error while writing
    */
   public void start() throws IOException {
+    System.out.println("ParquetFileWriter.start: start ");
     state = state.start();
     LOG.debug("{}: start", out.getPos());
     byte[] magic = MAGIC;

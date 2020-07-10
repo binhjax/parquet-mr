@@ -258,6 +258,8 @@ public class ParquetWriter<T> implements Closeable {
       ParquetProperties encodingProps,
       FileEncryptionProperties encryptionProperties) throws IOException {
 
+    System.out.println("ParquetWriter.construct: start 1");
+
     WriteSupport.WriteContext writeContext = writeSupport.init(conf);
     MessageType schema = writeContext.getSchema();
 
@@ -281,6 +283,8 @@ public class ParquetWriter<T> implements Closeable {
   }
 
   public void write(T object) throws IOException {
+    System.out.println("ParquetWriter.write: start");
+
     try {
       writer.write(object);
     } catch (InterruptedException e) {

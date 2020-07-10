@@ -54,6 +54,7 @@ public class ParquetRecordWriter<T> extends RecordWriter<Void, T> {
       boolean enableDictionary,
       boolean validating,
       WriterVersion writerVersion) {
+    System.out.println("ParquetRecordWriter.construct: start 1");
     ParquetProperties props = ParquetProperties.builder()
         .withPageSize(pageSize)
         .withDictionaryPageSize(dictionaryPageSize)
@@ -94,6 +95,8 @@ public class ParquetRecordWriter<T> extends RecordWriter<Void, T> {
       boolean validating,
       WriterVersion writerVersion,
       MemoryManager memoryManager) {
+
+    System.out.println("ParquetRecordWriter.construct: start 2");
     ParquetProperties props = ParquetProperties.builder()
         .withPageSize(pageSize)
         .withDictionaryPageSize(dictionaryPageSize)
@@ -129,6 +132,8 @@ public class ParquetRecordWriter<T> extends RecordWriter<Void, T> {
       ParquetProperties props,
       MemoryManager memoryManager,
       Configuration conf) {
+
+    System.out.println("ParquetRecordWriter.construct: start 3");
     this.codecFactory = new CodecFactory(conf, props.getPageSizeThreshold());
     internalWriter = new InternalParquetRecordWriter<T>(w, writeSupport, schema,
         extraMetaData, blockSize, codecFactory.getCompressor(codec), validating,
@@ -160,6 +165,7 @@ public class ParquetRecordWriter<T> extends RecordWriter<Void, T> {
    */
   @Override
   public void write(Void key, T value) throws IOException, InterruptedException {
+    System.out.println("ParquetRecordWriter.write: call internalWriter.write");
     internalWriter.write(value);
   }
 

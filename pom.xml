@@ -501,6 +501,7 @@
               <excludeModule>parquet-hadoop-bundle</excludeModule>
               <excludeModule>parquet-hive-bundle</excludeModule>
               <excludeModule>parquet-pig-bundle</excludeModule>
+              <excludeModule>parquet-teko</excludeModule>
             </excludeModules>
             <excludes>
               <exclude>${shade.prefix}</exclude>

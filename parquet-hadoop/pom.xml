@@ -33,6 +33,7 @@
   <url>https://parquet.apache.org</url>
 
   <properties>
+     <checkstyle.skip>true</checkstyle.skip>
   </properties>
 
   <dependencies>
@@ -122,10 +123,28 @@
       <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.google.googlejavaformat</groupId>
+      <artifactId>google-java-format</artifactId>
+      <version>1.8</version>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+          <groupId>org.basepom.maven</groupId>
+          <artifactId>duplicate-finder-maven-plugin</artifactId>
+          <version>1.4.0</version>
+          <configuration>
+            <ignoredDependencies>
+              <dependency>
+                <groupId>io.prestosql.hive</groupId>
+                <artifactId>hive-apache</artifactId>
+              </dependency>
+            </ignoredDependencies>
+          </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
       </plugin>
