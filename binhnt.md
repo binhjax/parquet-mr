@@ -68,31 +68,28 @@ sc._jsc.hadoopConfiguration().set("fs.s3a.access.key","minioadmin")
 sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key","minioadmin")
 sc._jsc.hadoopConfiguration().set("fs.s3a.path.style.access","True")
 
-sc._jvm.com.teko.parquet.TekoVaultFactory.InitializeKeys(sc._jsc.hadoopConfiguration())
-
-no_encryptedParquetPath = "s3a://encrypted/no_encrypted"
-squaresDF.write.parquet(no_encryptedParquetPath)
-
-
 sc._jsc.hadoopConfiguration().set("parquet.crypto.factory.class" , "com.teko.parquet.TekoVaultFactory")
 sc._jsc.hadoopConfiguration().set("encryption.kms.instance.url", "http://vault:8200" )
 sc._jsc.hadoopConfiguration().set("encryption.user.username", "binhnt" )
 sc._jsc.hadoopConfiguration().set("encryption.user.password", "123456" )
-sc._jsc.hadoopConfiguration().set("encryption.secrets.path", "kv/parquet/encrypted/test_encrypted" )
-sc._jsc.hadoopConfiguration().set("encryption.columns", "square_int_column" )
 
-sc._jvm.com.teko.parquet.TekoVaultFactory.InitializeKeys(sc._jsc.hadoopConfiguration())
 
-#java_import(sparkContext._jvm, "com.teko.parquet.TekoVaultFactory")
-#TekoVaultFactory  = spark.sparkContext._jvm.TekoVaultFactory()
-#TekoVaultFactory.createColumnKeys(sc._jsc.hadoopConfiguration())
+no_encryptedParquetPath = "s3a://encrypted/no_encrypted"
+squaresDF.write.parquet(no_encryptedParquetPath)
+
+import json
+
+secure_path = "kv/parquet/encrypted/sale_record_new"
+metadata = json.loads(InitColumnKey(conf,secure_path,"country"))
+squaresDF = squaresDF.withColumn("country",df.country.alias("country",metadata=metadata))
+squaresDF.schema.json()
 
 encryptedParquetPath = "s3a://encrypted/test_encrypted"
 squaresDF.write.parquet(encryptedParquetPath)
 
+
+
   2. Decode parquet encryption
-
-
 
 docker-compose  exec spark-master /spark/bin/pyspark
 
@@ -107,13 +104,22 @@ sc._jsc.hadoopConfiguration().set("parquet.crypto.factory.class" , "com.teko.par
 sc._jsc.hadoopConfiguration().set("encryption.kms.instance.url", "http://vault:8200" )
 sc._jsc.hadoopConfiguration().set("encryption.user.username", "binhnt" )
 sc._jsc.hadoopConfiguration().set("encryption.user.password", "123456" )
-sc._jsc.hadoopConfiguration().set("encryption.secrets.path", "kv/parquet/encrypted/test_encrypted")
 
 encryptedParquetPath = "s3a://encrypted/test_encrypted"
 parquetFile = spark.read.parquet(encryptedParquetPath)
 parquetFile.show()
 
 
+test_df = spark.read.parquet(encryptedParquetPath)
+test_df.schema.json()
+test_df.show()
+
+child_df = test_df.select("country","region","order_id")
+encryptedParquetPath = "s3a://encrypted/sale_record_child"
+child_df.write.parquet(encryptedParquetPath)
+
+test_child_df = spark.read.parquet(encryptedParquetPath)
+test_child_df.show()
 
 
 # Structure
